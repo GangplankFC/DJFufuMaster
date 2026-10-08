@@ -1,0 +1,4 @@
+application.yml
+.env
+__pycache__/
+*.pyc	
