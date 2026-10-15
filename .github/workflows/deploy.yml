@@ -49,16 +49,30 @@ jobs:
     needs: build-and-push
     runs-on: ubuntu-latest
     steps:
-      - name: SSH and Deploy to Oracle Cloud
+      # Step 1: Checkout the code on the GitHub Runner first
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # Step 2: SCP (Copy) the files from GitHub to the Oracle VM, applying exclusions
+      - name: Copy files to Oracle VM
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.ORACLE_HOST_IP }}
+          username: ubuntu
+          key: ${{ secrets.ORACLE_SSH_KEY }}
+          # Removed the space after the '!' that was in your previous version
+          source: "*,!DJFufuMaster-Infra/**,!.github/**,!.git/**,!.gitignore,!readme.md,!examples/**"
+          target: "~/stack"
+
+      # Step 3: SSH into the VM and restart the bot
+      - name: SSH and Restart Docker
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.ORACLE_HOST_IP }}
           username: ubuntu
           key: ${{ secrets.ORACLE_SSH_KEY }}
-          source: ".,!DJFufuMaster-Infra/**,! .github/**,!.git/**,!.gitignore,!readme.md,!examples/**"
           script_stop: true
           script: |
             cd ~/stack
-            git reset --hard HEAD
-            git pull origin main
+            # Git pull is gone! We just restart the container with the newly copied files.
             docker compose up --build -d player
