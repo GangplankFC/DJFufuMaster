@@ -1,4 +1,5 @@
-application.yml
+# Infrastructure
+DJFufuMaster-Infra/
 .env
 __pycache__/
 *.pyc	

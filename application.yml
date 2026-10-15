@@ -1,0 +1,59 @@
+server:
+  port: 2333
+  address: 0.0.0.0
+
+lavalink:
+  plugins:
+    - dependency: "dev.lavalink.youtube:youtube-plugin:2be8e542d3f6f178e048dca565892684c2e40177"
+      snapshot: true
+  server:
+    password: ${LAVALINK_PASSWORD}
+    timeouts:
+      connectTimeoutMs: 10000
+      connectionRequestTimeoutMs: 10000
+      socketTimeoutMs: 10000
+    bufferDurationMs: 800
+    frameBufferDurationMs: 5000
+    opusEncodingQuality: 10
+    resamplingQuality: LOW
+    trackStuckThresholdMs: 15000
+    sources:
+      youtube: false
+      bandcamp: true
+      soundcloud: true
+      twitch: true
+      vimeo: true
+      http: true
+
+plugins:
+  youtube:
+    enabled: true
+    allowSearch: true
+    allowDirectVideoIds: true
+    allowDirectPlaylistIds: true
+    clients:
+      - MUSIC
+      - TVHTML5_SIMPLY
+      - ANDROID
+      - TV
+    remoteCipher:
+      url: "http://yt-cipher:8001"
+      password: "yt-cipher-token"
+    oauth:
+      enabled: true
+      refreshToken: ${YT_REFRESH_TOKEN}
+      skipInitialization: true
+
+logging:
+  level:
+    root: INFO
+    dev.lavalink: DEBUG
+    com.sedmelluq.discord.lavaplayer: DEBUG
+    dev.lavalink.youtube: DEBUG
+
+  request:
+    enabled: true
+    includeClientInfo: true
+    includeHeaders: false
+    includeQueryString: true
+    includePayload: true

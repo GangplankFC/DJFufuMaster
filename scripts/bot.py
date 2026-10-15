@@ -1,3 +1,4 @@
+import os
 import discord
 from discord.ext import commands
 from discord.ext import tasks
@@ -17,9 +18,9 @@ MESSAGES_PROCESSED = Counter('discord_messages_processed_total', 'Total messages
 ACTIVE_GUILDS = Gauge('discord_active_guilds', 'Current number of connected guilds')
 BOT_LATENCY = Gauge('discord_bot_latency_seconds', 'Discord WebSocket heartbeat latency')
 
-DISCORD_TOKEN = "MTU1NDIxODUxMjc0OTI5NzcxNA.G2F4wl.1VjNE9xu0kQ6NFMWQj5Yjep-l_6WRTQf0nSA-g"
+DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
 LAVALINK_URI = "http://lavalink:2333"
-LAVALINK_PASSWORD = "youshallnotpass"
+LAVALINK_PASSWORD = os.getenv("LAVALINK_PASSWORD")
 
 class MusicBot(commands.Bot):
     def __init__(self):

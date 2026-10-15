@@ -25,6 +25,8 @@ services:
     build: .
     container_name: python_controller
     restart: unless-stopped
+    env_file:
+      - .env
     ports:
       - "8000:8000"
     volumes:
