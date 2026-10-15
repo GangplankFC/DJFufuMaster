@@ -1,8 +1,11 @@
+from asyncio import tasks
+
 import discord
 from discord.ext import commands
 import wavelink
 import asyncio
 import logging
+from prometheus_client import start_http_server, Counter, Gauge
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("Music Bot")
@@ -10,6 +13,10 @@ logger = logging.getLogger("Music Bot")
 # 1. Setup Intents
 intents = discord.Intents.default()
 intents.message_content = False
+
+MESSAGES_PROCESSED = Counter('discord_messages_processed_total', 'Total messages processed by the bot')
+ACTIVE_GUILDS = Gauge('discord_active_guilds', 'Current number of connected guilds')
+BOT_LATENCY = Gauge('discord_bot_latency_seconds', 'Discord WebSocket heartbeat latency')
 
 DISCORD_TOKEN = "MTU1NDIxODUxMjc0OTI5NzcxNA.G2F4wl.1VjNE9xu0kQ6NFMWQj5Yjep-l_6WRTQf0nSA-g"
 LAVALINK_URI = "http://lavalink:2333"
@@ -22,6 +29,11 @@ class MusicBot(commands.Bot):
         super().__init__(command_prefix="!", intents=intents)
 
     async def setup_hook(self):
+        start_http_server(8000)
+        print("Prometheus metrics server started on port 8000", flush=True)
+        
+        self.update_metrics.start()
+
         logger.info("Waiting 5 seconds for Lavalink WebSocket to boot...")
         await asyncio.sleep(5)
 
@@ -32,10 +44,20 @@ class MusicBot(commands.Bot):
         await self.tree.sync()
         logger.info("Slash commands synced to Discord!")
 
+    @tasks.loop(seconds=15)
+    async def update_metrics(self):
+        ACTIVE_GUILDS.set(len(self.guilds))
+        BOT_LATENCY.set(self.latency)
+
+    async def on_message(self, message):
+        if not message.author.bot:
+            MESSAGES_PROCESSED.inc()
+        
+        await self.process_commands(message)
+
     async def on_ready(self):
         logger.info(f"Logged in as {self.user} (ID: {self.user.id})")
 
-    # Wavelink events belong INSIDE the class using 'self'
     async def on_wavelink_track_start(self, payload: wavelink.TrackStartEventPayload):
         logger.info(f"[WS TEST] Track Started: {payload.track.title}")
 
@@ -49,25 +71,19 @@ class MusicBot(commands.Bot):
 
         reason = str(payload.reason).upper()
 
-        # --- 1. LIVESTREAM HEALER ---
-        # Safely check if the track was a livestream (streams have 0 length)
         is_stream = False
         if payload.track:
             is_stream = getattr(payload.track, 'is_stream', False) or getattr(payload.track, 'length', 0) == 0
 
-        # If a stream naturally finishes or fails, it means it crashed. Resurrect it!
         if is_stream and reason in ["FINISHED", "LOAD_FAILED"]:
             print("[Lavalink] Stream dropped! Healing connection...", flush=True)
             await asyncio.sleep(0.1)
             await player.play(payload.track)
             return
 
-        # --- 2. QUEUE PROGRESSION (Normal songs & Skips) ---
-        # If reason is REPLACED, another song was forcibly started by a command. Do nothing.
         if reason == "REPLACED":
             return
 
-        # If the queue has songs waiting, play the next one!
         if not player.queue.is_empty:
             next_track = player.queue.get()
             print(f"Queue: Playing next song -> {next_track.title}", flush=True)
@@ -75,10 +91,8 @@ class MusicBot(commands.Bot):
         else:
             print("Queue is empty. Player is now idle.", flush=True)
 
-# 3. Initialize the Bot
 bot = MusicBot()
 
-# 4. Music Commands (These stay outside using @bot.tree.command)
 @bot.tree.command(name="play", description="Play a song or add it to the queue")
 async def play(interaction: discord.Interaction, query: str):
     if not interaction.user.voice:
@@ -130,5 +144,4 @@ async def resume(interaction: discord.Interaction):
     else:
         await interaction.response.send_message("The music is not paused.", ephemeral=True)
 
-# 5. Run Bot
 bot.run(DISCORD_TOKEN)

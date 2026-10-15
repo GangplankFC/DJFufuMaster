@@ -25,6 +25,8 @@ services:
     build: .
     container_name: python_controller
     restart: unless-stopped
+    ports:
+      - "8000:8000"
     volumes:
       - ./scripts/bot.py:/app/bot.py:ro 
     depends_on:
