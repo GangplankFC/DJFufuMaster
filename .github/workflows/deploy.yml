@@ -1,12 +1,10 @@
-name: Kiratech CI/CD Pipeline
+name: DJFufuMaster CI/CD Pipeline
 
-# Triggers the workflow on every push to the main branch
 on:
   push:
     branches: [ "main" ]
 
 jobs:
-  # 1. Lint the Python Code
   lint:
     runs-on: ubuntu-latest
     steps:
@@ -19,10 +17,8 @@ jobs:
       - name: Install Linter
         run: pip install flake8
       - name: Run Flake8
-        # Stops the build if there are critical syntax errors
         run: flake8 scripts/ --count --select=E9,F63,F7,F82 --show-source --statistics
 
-  # 2 & 3. Build & Push to GitHub Container Registry (GHCR)
   build-and-push:
     needs: lint
     runs-on: ubuntu-latest
@@ -57,9 +53,8 @@ jobs:
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.ORACLE_HOST_IP }}
-          username: ubuntu # Change to 'opc' if using Oracle Linux instead of Ubuntu
+          username: ubuntu
           key: ${{ secrets.ORACLE_SSH_KEY }}
-          # This connects to the VM, pulls the fresh code, and rebuilds the player
           script: |
             cd ~/DJFufuMaster
             git pull origin main
