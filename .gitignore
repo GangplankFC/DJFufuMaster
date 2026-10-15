@@ -1,5 +1,10 @@
-# Infrastructure
-DJFufuMaster-Infra/
+.terraform/
+*.tfstate
+*.tfstate.backup
+*.tfvars
+
+*.pem
 .env
+
 __pycache__/
 *.pyc	
