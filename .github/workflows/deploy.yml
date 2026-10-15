@@ -55,7 +55,7 @@ jobs:
           host: ${{ secrets.ORACLE_HOST_IP }}
           username: ubuntu
           key: ${{ secrets.ORACLE_SSH_KEY }}
-          source: "*, !DJFufuMaster-Infra/**, !.github/**, !.git/**"
+          source: "*, !DJFufuMaster-Infra/**, !.github/**, !.git/**, !.gitignore, !readme.md, !examples/**"
           script_stop: true
           script: |
             cd ~/stack

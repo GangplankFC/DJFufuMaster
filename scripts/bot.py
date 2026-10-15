@@ -144,4 +144,14 @@ async def resume(interaction: discord.Interaction):
     else:
         await interaction.response.send_message("The music is not paused.", ephemeral=True)
 
+@bot.tree.command(name="previous", description="Replay previously played song")
+async def previous(interaction: discord.Interaction):
+    player: wavelink.Player = interaction.guild.voice_client
+    if not player or not player.queue.history:
+        return await interaction.response.send_message("No previously played song to replay.", ephemeral=True)
+
+    last_track = player.queue.history[-1]
+    await player.play(last_track)
+    await interaction.response.send_message(f"🔁 Replaying: **{last_track.title}**")
+
 bot.run(DISCORD_TOKEN)
