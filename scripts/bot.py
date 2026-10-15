@@ -150,7 +150,7 @@ async def previous(interaction: discord.Interaction):
     if not player or not player.queue.history:
         return await interaction.response.send_message("No previously played song to replay.", ephemeral=True)
 
-    last_track = player.queue.history[-1]
+    last_track = player.queue.history[-2]
     await player.play(last_track)
     await interaction.response.send_message(f"🔁 Replaying: **{last_track.title}**")
 
