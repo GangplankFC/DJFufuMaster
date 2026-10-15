@@ -1,0 +1,7 @@
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: 'dj-fufu-master-metrics'
+    static_configs:
+      - targets: ['player:8000']
