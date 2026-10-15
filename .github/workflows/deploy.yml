@@ -41,8 +41,8 @@ jobs:
           push: true
           # Tags with both the specific commit hash and 'latest'
           tags: |
-            ghcr.io/${{ github.repository_owner }}/djfufumaster:${{ github.sha }}
-            ghcr.io/${{ github.repository_owner }}/djfufumaster:latest
+            ghcr.io/gangplankfc/djfufumaster:${{ github.sha }}
+            ghcr.io/gangplankfc/djfufumaster:latest
 
   # 4. Automate the Oracle VM Deployment
   deploy:
