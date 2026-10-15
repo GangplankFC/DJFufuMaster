@@ -153,11 +153,13 @@ async def previous(interaction: discord.Interaction):
     if not player.queue.history:
         return await interaction.response.send_message("No previous song to play.", ephemeral=True)
 
-    previous_track = player.queue.history.pop()
+    previous_track = player.queue.history[-1]
 
-    if player.playing:
+    del player.queue.history[-1]
+
+    if player.playing and player.current:
         player.queue.put_at_front(player.current)
-        
+
     await player.play(previous_track)
     await interaction.response.send_message(f"⏪ Rewinding to: **{previous_track.title}**")
 
