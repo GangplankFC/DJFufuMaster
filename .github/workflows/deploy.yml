@@ -55,6 +55,7 @@ jobs:
           host: ${{ secrets.ORACLE_HOST_IP }}
           username: ubuntu
           key: ${{ secrets.ORACLE_SSH_KEY }}
+          script_stop: true
           script: |
             cd ~/stack
             git pull origin main
