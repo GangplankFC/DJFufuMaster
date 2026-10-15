@@ -10,13 +10,14 @@ services:
 
   lavalink:
     image: ghcr.io/lavalink-devs/lavalink:4
-    network_mode: "host"
     container_name: lavalink_node
     restart: unless-stopped
+    ports:
+      - "2333:2333"
     volumes:
-      - ./application.yml:/opt/Lavalink/application.yml
+      - ./application.yml:/opt/Lavalink/application.yml:ro
     environment:
-      - _JAVA_OPTIONS=-Djava.net.preferIPv6Addresses=true -Djava.net.preferIPv4Stack=false
+      - _JAVA_OPTIONS=-Djava.net.preferIPv4Stack=true -Djdk.http.auth.tunneling.disabledSchemes=""
     depends_on:
       - yt-cipher
 
@@ -24,7 +25,8 @@ services:
     build: .
     container_name: python_controller
     restart: unless-stopped
-    network_mode: "host"
+    volumes:
+      - ./scripts/bot.py:/app/bot.py:ro 
     depends_on:
       - lavalink
 
@@ -39,8 +41,6 @@ services:
     image: alpine:3
     container_name: pot-updater
     restart: unless-stopped
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
     depends_on:
       - lavalink
       - pot-provider
