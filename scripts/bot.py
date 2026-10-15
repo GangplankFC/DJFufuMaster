@@ -147,11 +147,18 @@ async def resume(interaction: discord.Interaction):
 @bot.tree.command(name="previous", description="Replay previously played song")
 async def previous(interaction: discord.Interaction):
     player: wavelink.Player = interaction.guild.voice_client
-    if not player or not player.queue.history:
-        return await interaction.response.send_message("No previously played song to replay.", ephemeral=True)
+    if not player:
+        return await interaction.response.send_message("You must be in a voice channel!", ephemeral=True)
 
-    last_track = player.queue.history[-2]
-    await player.play(last_track)
-    await interaction.response.send_message(f"🔁 Replaying: **{last_track.title}**")
+    if not player.queue.history:
+        return await interaction.response.send_message("No previous song to play.", ephemeral=True)
+
+    previous_track = player.queue.history.pop()
+
+    if player.playing:
+        player.queue.put_at_front(player.current)
+        
+    await player.play(previous_track)
+    await interaction.response.send_message(f"⏪ Rewinding to: **{previous_track.title}**")
 
 bot.run(DISCORD_TOKEN)
