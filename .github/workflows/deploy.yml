@@ -1,0 +1,66 @@
+name: Kiratech CI/CD Pipeline
+
+# Triggers the workflow on every push to the main branch
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  # 1. Lint the Python Code
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install Linter
+        run: pip install flake8
+      - name: Run Flake8
+        # Stops the build if there are critical syntax errors
+        run: flake8 scripts/ --count --select=E9,F63,F7,F82 --show-source --statistics
+
+  # 2 & 3. Build & Push to GitHub Container Registry (GHCR)
+  build-and-push:
+    needs: lint
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and Push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          # Tags with both the specific commit hash and 'latest'
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/djfufumaster:${{ github.sha }}
+            ghcr.io/${{ github.repository_owner }}/djfufumaster:latest
+
+  # 4. Automate the Oracle VM Deployment
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
+      - name: SSH and Deploy to Oracle Cloud
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.ORACLE_HOST_IP }}
+          username: ubuntu # Change to 'opc' if using Oracle Linux instead of Ubuntu
+          key: ${{ secrets.ORACLE_SSH_KEY }}
+          # This connects to the VM, pulls the fresh code, and rebuilds the player
+          script: |
+            cd ~/DJFufuMaster
+            git pull origin main
+            docker compose up --build -d player
