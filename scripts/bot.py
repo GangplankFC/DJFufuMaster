@@ -157,7 +157,7 @@ async def previous(interaction: discord.Interaction):
 
     previous_track = player.queue.history.get()
 
-    player.queue.put_at_front(previous_track)
+    player.queue.put_at(0,previous_track)
 
     await player.skip()
 
