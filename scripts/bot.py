@@ -152,17 +152,15 @@ async def previous(interaction: discord.Interaction):
     if not player:
         return await interaction.response.send_message("You must be in a voice channel!", ephemeral=True)
 
-    if not player.queue.history:
+    if player.queue.history.is_empty:
         return await interaction.response.send_message("No previous song to play.", ephemeral=True)
 
-    previous_track = player.queue.history[-1]
+    previous_track = player.queue.history.get()
 
-    del player.queue.history[-1]
+    player.queue.put_at_front(previous_track)
 
-    if player.playing and player.current:
-        player.queue.put_at(0, player.current)
+    await player.skip()
 
-    await player.play(previous_track)
     await interaction.response.send_message(f"⏪ Rewinding to: **{previous_track.title}**")
 
 bot.run(DISCORD_TOKEN)
