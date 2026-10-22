@@ -101,6 +101,25 @@ class MusicBot(commands.Bot):
             await player.play(next_track)
         else:
             logger.info("Queue is empty. Player is now idle.")
+            await player.disconnect()
+
+    async def on_voice_state_update(self, member: discord.Member, before: discord.VoiceState, after: discord.VoiceState):
+        player: wavelink.Player = member.guild.voice_client
+        
+        if not player:
+            return
+
+        if member == self.user and before.channel and not after.channel:
+            logger.info(f"Bot forcibly kicked from {before.channel.name} in {member.guild.name}. Destroying player.")
+            await player.disconnect()
+            return
+
+        if player.channel:
+            human_members = [m for m in player.channel.members if not m.bot]
+            
+            if len(human_members) == 0:
+                logger.info(f"Everyone left {player.channel.name} in {member.guild.name}. Disconnecting to save resources.")
+                await player.disconnect()
 
 bot = MusicBot()
 

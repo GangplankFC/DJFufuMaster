@@ -29,8 +29,6 @@ services:
       - .env
     ports:
       - "8000:8000"
-    volumes:
-      - ./scripts/bot.py:/app/bot.py:ro 
     depends_on:
       - lavalink
 
@@ -49,7 +47,7 @@ services:
       - lavalink
       - pot-provider
     volumes:
-      - ./scripts/updater.sh:/updater.sh:ro
+      - ./scripts/pot/updater.sh:/updater.sh:ro
     command: sh /updater.sh
 
   prometheus:
