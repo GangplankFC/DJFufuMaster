@@ -155,6 +155,9 @@ async def previous(interaction: discord.Interaction):
     if player.queue.history.is_empty:
         return await interaction.response.send_message("No previous song to play.", ephemeral=True)
 
+    if player.playing:
+        player.queue.put_at(0,player.current)
+        
     previous_track = player.queue.history.get()
 
     player.queue.put_at(0,previous_track)
