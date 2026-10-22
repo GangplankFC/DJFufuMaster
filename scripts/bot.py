@@ -75,13 +75,13 @@ class MusicBot(commands.Bot):
         if payload.track:
             is_stream = getattr(payload.track, 'is_stream', False) or getattr(payload.track, 'length', 0) == 0
 
-        if is_stream and reason in ["FINISHED", "LOAD_FAILED"]:
+        if is_stream and ("FINISHED" in reason or "LOAD_FAILED" in reason):
             print("[Lavalink] Stream dropped! Healing connection...", flush=True)
             await asyncio.sleep(0.1)
             await player.play(payload.track)
             return
 
-        if reason == "REPLACED":
+        if "REPLACED" in reason:
             return
 
         player.queue.history.put(payload.track)
