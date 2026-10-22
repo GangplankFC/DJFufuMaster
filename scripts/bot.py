@@ -106,7 +106,7 @@ async def play(interaction: discord.Interaction, query: str):
     if not player:
         player = await interaction.user.voice.channel.connect(cls=wavelink.Player)
 
-    tracks = await wavelink.Playable.search(query)
+    tracks = await wavelink.Playable.search(query, source=wavelink.TrackSource.YouTube)
     if not tracks:
         return await interaction.followup.send("No songs found. Try a different search.")
 
@@ -157,7 +157,7 @@ async def previous(interaction: discord.Interaction):
 
     if player.playing:
         player.queue.put_at(0,player.current)
-        
+
     previous_track = player.queue.history.get()
 
     player.queue.put_at(0,previous_track)
