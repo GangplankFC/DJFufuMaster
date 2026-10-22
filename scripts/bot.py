@@ -84,6 +84,8 @@ class MusicBot(commands.Bot):
         if reason == "REPLACED":
             return
 
+        player.queue.history.put(payload.track)
+
         if not player.queue.is_empty:
             next_track = player.queue.get()
             print(f"Queue: Playing next song -> {next_track.title}", flush=True)
@@ -158,7 +160,7 @@ async def previous(interaction: discord.Interaction):
     del player.queue.history[-1]
 
     if player.playing and player.current:
-        player.queue.put_at_index(0, player.current)
+        player.queue.put_at(0, player.current)
 
     await player.play(previous_track)
     await interaction.response.send_message(f"⏪ Rewinding to: **{previous_track.title}**")
