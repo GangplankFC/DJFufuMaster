@@ -51,11 +51,11 @@ class MusicBot(commands.Bot):
         if isinstance(error, NotInVoiceChannel):
             await interaction.response.send_message("Treci ma pe canal!", ephemeral=True)
         elif isinstance(error, InDifferentVoiceChannel):
-            await interaction.response.send_message("Suntem pe canale diferite! Intra la mine sa pui muzica.", ephemeral=True)
+            await interaction.response.send_message("Treci ma la mine pe canal!", ephemeral=True)
         else:
             logger.error(f"Unhandled Command Error: {error}")
             if not interaction.response.is_done():
-                await interaction.response.send_message("A aparut o eroare interna.", ephemeral=True)
+                await interaction.response.send_message("Pusca ceva", ephemeral=True)
 
     @tasks.loop(seconds=15)
     async def update_metrics(self):
