@@ -68,4 +68,5 @@ jobs:
           script_stop: true
           script: |
             cd ~/stack
-            docker compose up --build -d player
+            kubectl apply -f k8s/
+            kubectl rollout restart deployment djfufumaster
