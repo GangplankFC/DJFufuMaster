@@ -6,7 +6,7 @@ apk add --no-cache curl jq > /dev/null 2>&1
 echo "Waiting 30 seconds for Lavalink to boot..."
 sleep 30
 
-API="http://host.docker.internal:2333/youtube"
+API="http://lavalink:2333/youtube"
 AUTH="Authorization: youshallnotpass"
 TYPE="Content-Type: application/json"
 

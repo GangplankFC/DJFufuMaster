@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lavalink
+  labels:
+    app: lavalink
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: lavalink
+  template:
+    metadata:
+      labels:
+        app: lavalink
+    spec:
+      containers:
+      - name: lavalink
+        image: ghcr.io/lavalink-devs/lavalink:4
+        ports:
+        - containerPort: 2333
+        envFrom:
+        - secretRef:
+            name: lavalink-secrets
+        env:
+        - name: SERVER_PORT
+          value: "2333"
+        - name: _JAVA_OPTIONS
+          value: '-Djava.net.preferIPv4Stack=true -Djdk.http.auth.tunneling.disabledSchemes=""'
+        volumeMounts:
+        - name: config-volume
+          mountPath: /opt/Lavalink/application.yml
+          subPath: application.yml
+          readOnly: true
+      volumes:
+      - name: config-volume
+        configMap:
+          name: lavalink-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: lavalink
+spec:
+  selector:
+    app: lavalink
+  ports:
+  - protocol: TCP
+    port: 2333
+    targetPort: 2333

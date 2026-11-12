@@ -1,0 +1,40 @@
+\apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: djfufumaster
+  labels:
+    app: djfufumaster
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: djfufumaster
+  template:
+    metadata:
+      labels:
+        app: djfufumaster
+    spec:
+      containers:
+      - name: bot
+        image: stack-player:latest
+        imagePullPolicy: Never
+        envFrom:
+        - secretRef:
+            name: bot-secrets
+        env:
+        - name: LAVALINK_URI
+          value: "http://lavalink:2333"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: djfufumaster-metrics
+  labels:
+    app: djfufumaster
+spec:
+  selector:
+    app: djfufumaster
+  ports:
+  - name: metrics
+    port: 8000
+    targetPort: 8000
