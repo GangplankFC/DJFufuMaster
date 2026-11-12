@@ -68,5 +68,5 @@ jobs:
           script_stop: true
           script: |
             cd ~/stack
-            kubectl apply -f k8s/
-            kubectl rollout restart deployment djfufumaster
+            sudo kubectl apply -f k8s/
+            sudo kubectl rollout restart deployment djfufumaster
